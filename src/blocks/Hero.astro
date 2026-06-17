@@ -1,0 +1,39 @@
+---
+/**
+ * Bloco hero — abertura de landing com imagem + overlay + CTA WhatsApp.
+ * Espelha o hero da home corporativa do andaimes (bg-ink + imagem opacity-60).
+ */
+import WhatsappCta from '../components/theme/WhatsappCta.astro';
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+  imagem?: string;
+  ctaLabel?: string;
+  ctaMensagem?: string;
+}
+const { eyebrow, title, lead, imagem, ctaLabel = 'Pedir Orçamento', ctaMensagem } = Astro.props;
+---
+<section class="relative isolate overflow-hidden bg-ink">
+  {imagem && (
+    <img
+      src={imagem}
+      alt=""
+      aria-hidden="true"
+      fetchpriority="high"
+      decoding="async"
+      class="absolute inset-0 -z-10 h-full w-full object-cover opacity-60"
+    />
+  )}
+  <div class="absolute inset-0 -z-10 bg-gradient-to-r from-ink/90 via-ink/75 to-ink/40" aria-hidden="true"></div>
+  <div class="container-x pt-20 md:pt-28 pb-16 md:pb-24">
+    <div class="max-w-3xl">
+      {eyebrow && <p class="eyebrow mb-5" style="color:rgb(147 197 253)">{eyebrow}</p>}
+      <h1 class="font-display text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.02] tracking-tight">{title}</h1>
+      {lead && <p class="text-lg md:text-xl text-slate-200 leading-relaxed mt-6 max-w-xl">{lead}</p>}
+      <div class="mt-8 flex flex-wrap items-center gap-4">
+        <WhatsappCta label={ctaLabel} mensagem={ctaMensagem} />
+      </div>
+    </div>
+  </div>
+</section>

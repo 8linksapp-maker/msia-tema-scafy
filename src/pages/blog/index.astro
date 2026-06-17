@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/ui/PostCard.astro';
+import { getCollection } from 'astro:content';
+import { CATEGORY_ORDER } from '../../lib/categoryColors';
+
+const allPosts = await getCollection('blog');
+
+function orderForCategory(cat: string | undefined) {
+  if (!cat) return 999;
+  const idx = CATEGORY_ORDER.indexOf(cat);
+  return idx >= 0 ? idx : 999;
+}
+
+const posts = allPosts.sort((a: any, b: any) => {
+  const oa = orderForCategory(a.data.category);
+  const ob = orderForCategory(b.data.category);
+  if (oa !== ob) return oa - ob;
+  return new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime();
+});
+---
+
+<BaseLayout title="Todos os artigos" description="Arquivo completo">
+  <section class="border-b border-rule">
+    <div class="container-x pt-16 md:pt-20 pb-10 md:pb-12 max-w-3xl">
+      <p class="eyebrow mb-4">conteúdo</p>
+      <h1 class="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-ink leading-[1.05] mb-4">
+        Dicas e guias sobre andaimes
+      </h1>
+      <p class="text-lg text-ink-muted leading-relaxed">
+        {posts.length} {posts.length === 1 ? 'artigo publicado' : 'artigos publicados'} sobre tipos de andaime, segurança e aluguel.
+      </p>
+    </div>
+  </section>
+
+  <div class="container-x py-12 md:py-16">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {posts.map((post: any, i: number) => (
+        <PostCard post={post} index={i} />
+      ))}
+    </div>
+  </div>
+</BaseLayout>

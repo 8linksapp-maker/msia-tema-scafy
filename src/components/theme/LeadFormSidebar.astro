@@ -1,0 +1,137 @@
+---
+/**
+ * LeadFormSidebar.astro — card de captura de lead flutuante (sidebar sticky no desktop,
+ * bloco no fluxo no mobile). Reusa /api/subscribe (mesmo endpoint do contato da home).
+ * Campo hidden `origem` = "{servico.slug}|{local.slug}" pra atribuição de conversão.
+ * WhatsApp como CTA secundário. Visual corporativo: card-trade, btn-primary, btn-whatsapp.
+ */
+import WhatsappCta from './WhatsappCta.astro';
+
+interface Props {
+  /** atribuição: "{servico.slug}|{local.slug}" */
+  origem: string;
+  /** título do card */
+  titulo?: string;
+  /** linha de apoio curta */
+  lead?: string;
+  /** mensagem pré-preenchida do WhatsApp */
+  waMensagem?: string;
+}
+const {
+  origem,
+  titulo = 'Peça seu orçamento',
+  lead = 'Resposta rápida pelo WhatsApp ou e-mail. Sem compromisso.',
+  waMensagem = '',
+} = Astro.props;
+
+// id único por instância (evita colisão de label/for se houver 2 forms na página)
+const fid = `lead-${Math.random().toString(36).slice(2, 8)}`;
+---
+<div class="card-trade p-6 md:p-7">
+  <p class="eyebrow mb-3">peça agora</p>
+  <h3 class="font-display text-xl md:text-2xl font-bold tracking-tight text-ink leading-tight mb-2">{titulo}</h3>
+  {lead && <p class="text-sm text-ink-muted leading-relaxed mb-5">{lead}</p>}
+
+  <form class="space-y-4" action="/api/subscribe" method="POST" data-lead-form>
+    <input type="hidden" name="origem" value={origem} />
+    <input type="hidden" name="source" value={origem} />
+    <div>
+      <label class="mono uppercase text-ink-faint block mb-2" for={`${fid}-name`}>nome</label>
+      <input
+        type="text"
+        id={`${fid}-name`}
+        name="name"
+        autocomplete="name"
+        required
+        class="w-full bg-transparent border-b border-rule focus:border-ink py-2 text-ink outline-none transition-colors min-h-[44px]"
+      />
+    </div>
+    <div>
+      <label class="mono uppercase text-ink-faint block mb-2" for={`${fid}-phone`}>whatsapp / telefone</label>
+      <input
+        type="tel"
+        id={`${fid}-phone`}
+        name="phone"
+        autocomplete="tel"
+        inputmode="tel"
+        required
+        class="w-full bg-transparent border-b border-rule focus:border-ink py-2 text-ink outline-none transition-colors min-h-[44px]"
+      />
+    </div>
+    <div>
+      <label class="mono uppercase text-ink-faint block mb-2" for={`${fid}-email`}>e-mail</label>
+      <input
+        type="email"
+        id={`${fid}-email`}
+        name="email"
+        autocomplete="email"
+        inputmode="email"
+        required
+        class="w-full bg-transparent border-b border-rule focus:border-ink py-2 text-ink outline-none transition-colors min-h-[44px]"
+      />
+    </div>
+    <div>
+      <label class="mono uppercase text-ink-faint block mb-2" for={`${fid}-message`}>mensagem</label>
+      <textarea
+        id={`${fid}-message`}
+        name="message"
+        rows="3"
+        class="w-full bg-transparent border-b border-rule focus:border-ink py-2 text-ink outline-none transition-colors resize-y"
+      ></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary w-full justify-center" data-lead-submit>
+      enviar pedido
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+    <p class="text-sm text-ink-muted leading-snug hidden" data-lead-status aria-live="polite"></p>
+  </form>
+
+  <div class="mt-5 pt-5 border-t border-rule">
+    <p class="mono uppercase text-ink-faint mb-3">ou fale agora</p>
+    <WhatsappCta mensagem={waMensagem} full={true} />
+  </div>
+</div>
+
+<script>
+  // Enhancement progressivo: intercepta o submit, posta no /api/subscribe e mostra feedback.
+  // Sem JS o form ainda funciona (POST nativo pro mesmo endpoint).
+  document.querySelectorAll<HTMLFormElement>('form[data-lead-form]').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = form.querySelector<HTMLElement>('[data-lead-status]');
+      const btn = form.querySelector<HTMLButtonElement>('[data-lead-submit]');
+      const show = (msg: string) => {
+        if (!status) return;
+        status.textContent = msg;
+        status.classList.remove('hidden');
+      };
+      if (btn) btn.disabled = true;
+      try {
+        const fd = new FormData(form);
+        const payload = {
+          name: String(fd.get('name') || ''),
+          email: String(fd.get('email') || ''),
+          phone: String(fd.get('phone') || ''),
+          message: String(fd.get('message') || ''),
+          source: String(fd.get('origem') || fd.get('source') || ''),
+        };
+        const res = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
+          show('Pedido enviado! Em breve entramos em contato.');
+          form.reset();
+        } else {
+          show(data.error || 'Não foi possível enviar. Tente pelo WhatsApp.');
+        }
+      } catch {
+        show('Não foi possível enviar. Tente pelo WhatsApp.');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+  });
+</script>

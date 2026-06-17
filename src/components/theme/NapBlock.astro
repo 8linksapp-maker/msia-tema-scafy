@@ -1,0 +1,53 @@
+---
+/**
+ * NapBlock.astro — bloco NAP (Nome / Endereço / Telefone) de FONTE ÚNICA.
+ * Renderiza idêntico no rodapé, na seção "Como nos encontrar" e alimenta o schema.
+ * Sempre lê de config.json — nunca hardcode.
+ */
+import { getConfig, napEndereco, telDigits, whatsappLink } from '../../lib/themeData';
+
+interface Props {
+  variant?: 'full' | 'compact';
+}
+const { variant = 'full' } = Astro.props;
+const c = getConfig();
+const endereco = napEndereco(c);
+const tel = telDigits(c.telefone);
+const wa = (c.whatsapp || '').replace(/\D/g, '');
+---
+<div class="space-y-4 not-prose">
+  <div>
+    <div class="mono uppercase text-ink-faint mb-1">empresa</div>
+    <p class="text-base font-medium text-ink" itemprop="name">{c.nome}</p>
+  </div>
+  {endereco && (
+    <div>
+      <div class="mono uppercase text-ink-faint mb-1">endereço</div>
+      <p class="text-base text-ink leading-relaxed">{endereco}</p>
+    </div>
+  )}
+  {c.telefone && (
+    <div>
+      <div class="mono uppercase text-ink-faint mb-1">telefone</div>
+      <a href={`tel:${tel}`} class="text-base font-medium text-ink hover:text-primary transition-colors">{c.telefone}</a>
+    </div>
+  )}
+  {wa && (
+    <div>
+      <div class="mono uppercase text-ink-faint mb-1">whatsapp</div>
+      <a href={whatsappLink(c.whatsapp)} target="_blank" rel="noopener" class="text-base font-medium text-ink hover:text-primary transition-colors">{c.telefone || c.whatsapp}</a>
+    </div>
+  )}
+  {variant === 'full' && c.email && (
+    <div>
+      <div class="mono uppercase text-ink-faint mb-1">email</div>
+      <a href={`mailto:${c.email}`} class="text-base font-medium text-ink hover:text-primary transition-colors">{c.email}</a>
+    </div>
+  )}
+  {variant === 'full' && c.horario && (
+    <div>
+      <div class="mono uppercase text-ink-faint mb-1">horário</div>
+      <p class="text-base text-ink">{c.horario}</p>
+    </div>
+  )}
+</div>

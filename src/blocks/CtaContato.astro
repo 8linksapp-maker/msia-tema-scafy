@@ -1,0 +1,45 @@
+---
+/**
+ * Bloco ctaContato — fechamento de página: NAP + WhatsApp + formulário /api/subscribe.
+ * Espelha a seção de contato da home corporativa do andaimes.
+ */
+import WhatsappCta from '../components/theme/WhatsappCta.astro';
+import NapBlock from '../components/theme/NapBlock.astro';
+interface Props { eyebrow?: string; title: string; lead?: string; origem?: string; ctaMensagem?: string; }
+const { eyebrow, title, lead, origem = 'pagina', ctaMensagem } = Astro.props;
+---
+<section id="contato" class="border-b border-rule">
+  <div class="container-x py-14 md:py-20">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start">
+      <div class="md:col-span-5">
+        {eyebrow && <p class="eyebrow mb-4">{eyebrow}</p>}
+        <h2 class="font-display text-2xl md:text-4xl font-bold tracking-tight text-ink leading-[1.1] mb-5">{title}</h2>
+        {lead && <p class="text-lg text-ink-muted leading-relaxed mb-6">{lead}</p>}
+        <div class="mb-8"><WhatsappCta mensagem={ctaMensagem} /></div>
+        <div class="mono uppercase text-ink-faint mb-4 pb-3 border-b border-rule">como nos encontrar</div>
+        <NapBlock variant="full" />
+      </div>
+      <div class="md:col-span-6 md:col-start-7">
+        <form class="space-y-5" action="/api/subscribe" method="POST">
+          <input type="hidden" name="source" value={origem} />
+          <div>
+            <label class="mono uppercase text-ink-faint block mb-2" for="cb-name">nome</label>
+            <input type="text" id="cb-name" name="name" required class="w-full bg-transparent border-b border-rule focus:border-ink py-2 text-ink outline-none transition-colors min-h-[44px]" />
+          </div>
+          <div>
+            <label class="mono uppercase text-ink-faint block mb-2" for="cb-email">email</label>
+            <input type="email" id="cb-email" name="email" required class="w-full bg-transparent border-b border-rule focus:border-ink py-2 text-ink outline-none transition-colors min-h-[44px]" />
+          </div>
+          <div>
+            <label class="mono uppercase text-ink-faint block mb-2" for="cb-message">mensagem</label>
+            <textarea id="cb-message" name="message" rows="4" class="w-full bg-transparent border-b border-rule focus:border-ink py-2 text-ink outline-none transition-colors resize-y"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            enviar
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

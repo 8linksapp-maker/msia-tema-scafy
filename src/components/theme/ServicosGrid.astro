@@ -1,0 +1,38 @@
+---
+/**
+ * ServicosGrid.astro — grade dos 9 serviços fixos. Lê de servicos.json.
+ * Cards convencionais (borda + sombra leve + ícone). Cada card linka pro hub /[servico].
+ */
+import { getServicos } from '../../lib/themeData';
+const servicos = getServicos();
+---
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  {servicos.map((s) => (
+    <a
+      href={`/${s.slug}`}
+      class="card-trade group flex flex-col overflow-hidden"
+    >
+      {s.imagem && (
+        <img
+          src={s.imagem}
+          alt={s.nome}
+          loading="lazy"
+          decoding="async"
+          class="w-full aspect-[16/10] object-cover"
+        />
+      )}
+      <div class="p-6 md:p-7 flex flex-col gap-3 flex-1">
+        <h3 class="font-display text-lg md:text-xl font-bold tracking-tight text-ink leading-tight group-hover:text-primary transition-colors">
+          {s.nome}
+        </h3>
+        {s.resumo && (
+          <p class="text-sm text-ink-muted leading-relaxed line-clamp-3">{s.resumo}</p>
+        )}
+        <span class="text-sm font-semibold text-primary mt-auto pt-2 inline-flex items-center gap-2 group-hover:gap-3 transition-all">
+          Ver detalhes
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </div>
+    </a>
+  ))}
+</div>

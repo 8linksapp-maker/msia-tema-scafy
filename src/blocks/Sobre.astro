@@ -1,0 +1,47 @@
+---
+/**
+ * Bloco sobre — texto institucional + lista de benefícios + imagem.
+ * Grid 12 colunas corporativo, checklist com check azul (igual home).
+ */
+interface Props {
+  imagem?: string;
+  badge?: string;
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+  benefits?: string[];
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+const { imagem, badge, eyebrow, title, lead, benefits = [], ctaLabel, ctaHref } = Astro.props;
+---
+<section class="border-b border-rule">
+  <div class="container-x py-14 md:py-20">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-center">
+      <div class="lg:col-span-5 relative">
+        <div class="aspect-[4/3] overflow-hidden border border-border rounded bg-surface">
+          {imagem && <img src={imagem} alt={title} loading="lazy" decoding="async" class="w-full h-full object-cover" />}
+        </div>
+        {badge && <span class="absolute -bottom-4 left-6 btn btn-primary text-sm pointer-events-none">{badge}</span>}
+      </div>
+      <div class="lg:col-span-6 lg:col-start-7">
+        {eyebrow && <p class="eyebrow mb-4">{eyebrow}</p>}
+        <h2 class="font-display text-2xl md:text-3xl font-bold tracking-tight text-ink leading-[1.1]">{title}</h2>
+        {lead && <p class="text-lg text-ink-muted leading-relaxed mt-4">{lead}</p>}
+        {benefits.length > 0 && (
+          <ul class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {benefits.map((b) => (
+              <li class="flex items-start gap-2 text-ink">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary shrink-0 mt-0.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {ctaLabel && ctaHref && (
+          <a href={ctaHref} class="btn btn-ghost mt-8">{ctaLabel}</a>
+        )}
+      </div>
+    </div>
+  </div>
+</section>

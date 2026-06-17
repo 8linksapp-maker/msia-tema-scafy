@@ -1,0 +1,12 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import ServicosEditor from '../../components/admin/ServicosEditor';
+---
+<AdminLayout title="Serviços" activeSection="servicos">
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-ink">Serviços</h1>
+        <p class="text-ink-muted mt-1">Edite os serviços oferecidos: resumo, conteúdo e perguntas frequentes.</p>
+    </div>
+    <ServicosEditor client:load />
+</AdminLayout>

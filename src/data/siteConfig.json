@@ -1,0 +1,33 @@
+{
+  "name": "Andaimes São Paulo Locações",
+  "description": "Aluguel de andaimes com entrega rápida, montagem e segurança dentro da NR-18. Atendemos obras e reformas na sua região.",
+  "url": "https://andaimessaopaulo.com.br",
+  "postUrlPrefix": "blog",
+  "author": "Andaimes São Paulo Locações",
+  "language": "pt-BR",
+  "logo": "",
+  "favicon": "/favicon.svg",
+  "ogImage": "/og-default.jpg",
+  "theme": {
+    "primary": "#1d4ed8",
+    "dark": "#0f172a",
+    "fontDisplay": "Inter",
+    "fontBody": "Inter"
+  },
+  "social": {
+    "instagram": "https://instagram.com/andaimessaopaulo",
+    "twitter": "",
+    "facebook": "https://facebook.com/andaimessaopaulo",
+    "youtube": ""
+  },
+  "contact": {
+    "email": "contato@andaimessaopaulo.com.br",
+    "phone": "(11) 4002-8922",
+    "address": "Av. das Locações, 1500 - Galpão 4 — Vila Maria, São Paulo/SP",
+    "name": "Andaimes São Paulo Locações"
+  },
+  "legal": {
+    "terms_last_updated": "",
+    "privacy_last_updated": ""
+  }
+}

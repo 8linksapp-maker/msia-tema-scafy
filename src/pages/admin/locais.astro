@@ -1,0 +1,12 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import LocaisEditor from '../../components/admin/LocaisEditor';
+---
+<AdminLayout title="Cidades" activeSection="locais">
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-ink">Cidades atendidas</h1>
+        <p class="text-ink-muted mt-1">Cidades, bairros e referências que geram as páginas locais.</p>
+    </div>
+    <LocaisEditor client:load />
+</AdminLayout>

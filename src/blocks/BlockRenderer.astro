@@ -1,0 +1,10 @@
+---
+import { blockRegistry } from './registry';
+import type { Block } from './types';
+interface Props { blocks: Block[]; }
+const { blocks = [] } = Astro.props;
+---
+{blocks.map((b) => {
+  const Cmp = blockRegistry[b.type] as any;
+  return Cmp ? <Cmp {...b.props} /> : null;
+})}

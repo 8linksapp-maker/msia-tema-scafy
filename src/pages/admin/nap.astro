@@ -1,0 +1,12 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import NapEditor from '../../components/admin/NapEditor';
+---
+<AdminLayout title="Dados da empresa" activeSection="nap">
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-ink">Dados da empresa</h1>
+        <p class="text-ink-muted mt-1">Nome, telefone, endereço e redes — fonte única exibida no site (NAP).</p>
+    </div>
+    <NapEditor client:load />
+</AdminLayout>

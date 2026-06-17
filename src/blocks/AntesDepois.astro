@@ -1,0 +1,33 @@
+---
+/**
+ * Bloco antesDepois — pares de imagem antes/depois (no nicho: antes/depois de obra).
+ */
+interface Item { label: string; before?: string; after?: string; }
+interface Props { eyebrow?: string; title: string; items?: Item[]; }
+const { eyebrow, title, items = [] } = Astro.props;
+---
+<section class="border-b border-rule">
+  <div class="container-x py-14 md:py-20">
+    <div class="max-w-2xl mb-10 md:mb-12">
+      {eyebrow && <p class="eyebrow mb-4">{eyebrow}</p>}
+      <h2 class="font-display text-2xl md:text-4xl font-bold tracking-tight text-ink leading-[1.1]">{title}</h2>
+    </div>
+    <div class="grid gap-8 md:grid-cols-2">
+      {items.map((it) => (
+        <div class="card-trade p-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="aspect-square overflow-hidden rounded bg-surface relative">
+              {it.before && <img src={it.before} alt={`Antes — ${it.label}`} loading="lazy" decoding="async" class="w-full h-full object-cover" />}
+              <span class="absolute top-2 left-2 text-xs font-semibold bg-ink/75 text-white px-2 py-0.5 rounded">Antes</span>
+            </div>
+            <div class="aspect-square overflow-hidden rounded bg-surface relative">
+              {it.after && <img src={it.after} alt={`Depois — ${it.label}`} loading="lazy" decoding="async" class="w-full h-full object-cover" />}
+              <span class="absolute top-2 left-2 text-xs font-semibold bg-primary text-white px-2 py-0.5 rounded">Depois</span>
+            </div>
+          </div>
+          <p class="mt-3 text-sm font-medium text-ink">{it.label}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

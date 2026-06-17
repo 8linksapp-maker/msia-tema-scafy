@@ -1,0 +1,109 @@
+[
+  {
+    "slug": "promocoes",
+    "title": "Promoções de aluguel de andaime",
+    "description": "Condições especiais no aluguel de andaimes para obras de todos os portes. Peça seu orçamento com desconto pelo WhatsApp.",
+    "blocks": [
+      {
+        "type": "pageHeader",
+        "props": {
+          "eyebrow": "promoções",
+          "title": "Condições especiais no aluguel de andaime",
+          "lead": "Pacotes com preço fechado para obra, montagem inclusa e entrega no canteiro. Fale com a gente e garanta o desconto.",
+          "breadcrumb": [
+            { "label": "Início", "href": "/" },
+            { "label": "Promoções", "href": "/promocoes" }
+          ]
+        }
+      },
+      {
+        "type": "servicos",
+        "props": {
+          "eyebrow": "o que entra na promoção",
+          "title": "Equipamentos com condição especial",
+          "items": [
+            { "title": "Andaime fachadeiro", "text": "Ideal para fachadas e pintura externa. Montagem conforme a NR-18.", "imagem": "/assets/img/servicos/andaime-fachadeiro.jpg" },
+            { "title": "Andaime tubular", "text": "Versátil para obras internas e reformas. Locação por período.", "imagem": "/assets/img/servicos/andaime-tubular.jpg" },
+            { "title": "Torre de andaime", "text": "Acesso rápido em altura com estabilidade e segurança.", "imagem": "/assets/img/servicos/torre-de-andaime.jpg" }
+          ]
+        }
+      },
+      {
+        "type": "numeros",
+        "props": {
+          "stats": [
+            { "value": "24h", "label": "Resposta ao orçamento" },
+            { "value": "NR-18", "label": "Montagem em conformidade" },
+            { "value": "+500", "label": "Obras atendidas" },
+            { "value": "100%", "label": "Entrega no canteiro" }
+          ]
+        }
+      },
+      {
+        "type": "ctaContato",
+        "props": {
+          "eyebrow": "garanta o desconto",
+          "title": "Peça seu orçamento com condição especial",
+          "lead": "Mande os detalhes da sua obra que a gente monta a melhor proposta para você.",
+          "origem": "promocoes",
+          "ctaMensagem": "Olá! Vi a promoção e quero um orçamento de aluguel de andaime."
+        }
+      }
+    ]
+  },
+  {
+    "slug": "orcamento",
+    "title": "Peça seu orçamento de andaime",
+    "description": "Solicite um orçamento de aluguel de andaime sem compromisso. Atendimento direto pelo WhatsApp e montagem com segurança.",
+    "blocks": [
+      {
+        "type": "pageHeader",
+        "props": {
+          "eyebrow": "orçamento",
+          "title": "Solicite seu orçamento sem compromisso",
+          "lead": "Conte sobre a sua obra e receba uma proposta com preço, prazo e condições de montagem.",
+          "breadcrumb": [
+            { "label": "Início", "href": "/" },
+            { "label": "Orçamento", "href": "/orcamento" }
+          ]
+        }
+      },
+      {
+        "type": "comoFunciona",
+        "props": {
+          "eyebrow": "como funciona",
+          "title": "Três passos para alugar seu andaime",
+          "steps": [
+            { "n": "01", "title": "Conte sua obra", "text": "Tipo de serviço, altura e prazo. Um minuto pelo WhatsApp." },
+            { "n": "02", "title": "Receba a proposta", "text": "Preço fechado com montagem e entrega no canteiro." },
+            { "n": "03", "title": "Montamos com segurança", "text": "Equipe técnica e equipamento conforme a NR-18." }
+          ]
+        }
+      },
+      {
+        "type": "porqueEscolher",
+        "props": {
+          "eyebrow": "por que alugar com a gente",
+          "title": "Segurança e agilidade na sua obra",
+          "imagem": "/assets/img/servicos/montagem-desmontagem.jpg",
+          "features": [
+            { "title": "Montagem conforme a NR-18", "text": "Equipe treinada e ART do responsável técnico." },
+            { "title": "Entrega no canteiro", "text": "Logística própria, sem custo extra na cidade." },
+            { "title": "Preço fechado", "text": "Sem surpresa: orçamento claro por período." },
+            { "title": "Atendimento direto", "text": "Fala com quem resolve, pelo WhatsApp." }
+          ]
+        }
+      },
+      {
+        "type": "ctaContato",
+        "props": {
+          "eyebrow": "fale com a gente",
+          "title": "Receba seu orçamento agora",
+          "lead": "Resposta rápida e proposta sob medida para o porte da sua obra.",
+          "origem": "orcamento",
+          "ctaMensagem": "Olá! Quero um orçamento de aluguel de andaime para a minha obra."
+        }
+      }
+    ]
+  }
+]

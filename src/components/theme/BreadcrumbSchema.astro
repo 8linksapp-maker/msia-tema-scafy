@@ -1,0 +1,26 @@
+---
+/**
+ * BreadcrumbSchema.astro — JSON-LD BreadcrumbList.
+ * Props: items = [{ name, url }] na ordem da trilha.
+ */
+import { readData } from '../../lib/readData';
+
+interface Props {
+  items: { name: string; url: string }[];
+}
+const { items } = Astro.props;
+const siteConfig = readData('siteConfig.json');
+const siteUrl = siteConfig.url || Astro.site || Astro.url.origin;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((item, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: item.name,
+    item: new URL(item.url, siteUrl).toString(),
+  })),
+};
+---
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

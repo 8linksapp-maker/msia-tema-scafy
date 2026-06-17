@@ -1,0 +1,413 @@
+---
+/**
+ * [slug].astro — DISPATCHER de rota raiz. Unifica 3 tipos de slug:
+ *   - kind 'hub'  → hub de serviço (antes em [servico].astro). Lê servicos.json.
+ *   - kind 'page' → página de blocos criada via admin (page-builder). Lê pages.json.
+ *   - kind 'post' → post do blog (quando postUrlPrefix !== 'blog').
+ *
+ * Precedência de slug: hub > page > post (serviço é core; página de bloco não
+ * pode sobrescrever um hub; post só entra se o prefixo do blog é raiz).
+ * Rotas estáticas (index/sobre/contato) têm precedência sobre [slug] no Astro.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BlockRenderer from '../blocks/BlockRenderer.astro';
+import PostVideo from '../components/ui/PostVideo.astro';
+import WhatsappCta from '../components/theme/WhatsappCta.astro';
+import NapBlock from '../components/theme/NapBlock.astro';
+import LocalBusinessSchema from '../components/theme/LocalBusinessSchema.astro';
+import BreadcrumbSchema from '../components/theme/BreadcrumbSchema.astro';
+import LeadFormSidebar from '../components/theme/LeadFormSidebar.astro';
+import { getCollection } from 'astro:content';
+import { readData } from '../lib/readData';
+import { getServicos, getLocais, getConfig, getPaginas, matrixUrl } from '../lib/themeData';
+import { colorForCategory } from '../lib/categoryColors';
+import { normalizeCategories, getCategorySlug } from '../lib/categorySlug';
+import { parseVideoUrl } from '../lib/videoEmbed';
+import { renderShortcodes, hasShortcodes } from '../lib/shortcodes';
+import { marked } from 'marked';
+import type { Block } from '../blocks/types';
+
+export const prerender = true;
+
+const allCategories = normalizeCategories(readData('categories.json', []));
+
+export async function getStaticPaths() {
+  const siteConfig = readData('siteConfig.json', {}) as any;
+
+  // (a) hubs de serviço — sempre geram. Reservam o slug primeiro.
+  const servicos = getServicos();
+  const taken = new Set<string>();
+  const hubPaths = servicos.map((servico) => {
+    taken.add(servico.slug);
+    return { params: { slug: servico.slug }, props: { kind: 'hub', servico } };
+  });
+
+  // (b) páginas de blocos — geram se o slug não colidir com hub.
+  const pagePaths = getPaginas()
+    .filter((p) => p?.slug && !taken.has(p.slug))
+    .map((page) => {
+      taken.add(page.slug);
+      return { params: { slug: page.slug }, props: { kind: 'page', page } };
+    });
+
+  // (c) posts do blog — só quando o prefixo do blog é a raiz (evita /blog/[slug]).
+  let postPaths: any[] = [];
+  if (siteConfig?.postUrlPrefix !== 'blog') {
+    const posts = await getCollection('blog');
+    postPaths = posts
+      .filter((post: any) => !taken.has(post.slug ?? post.id))
+      .map((post: any) => ({ params: { slug: post.slug ?? post.id }, props: { kind: 'post', post } }));
+  }
+
+  return [...hubPaths, ...pagePaths, ...postPaths];
+}
+
+const props = Astro.props as any;
+const kind: 'hub' | 'page' | 'post' = props.kind;
+
+// ===== Shared helpers (blog) =====
+function fmtDate(d: any): string {
+  if (!d) return '';
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return '';
+  return dt.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: '2-digit' });
+}
+
+// ===== HUB (serviço) =====
+let hub: any = null;
+if (kind === 'hub') {
+  const servico = props.servico;
+  const locais = getLocais();
+  const title = servico.nome;
+  const description =
+    servico.resumo ||
+    `${servico.nome}. Entrega rápida e montagem com segurança. Peça seu orçamento.`;
+  const topicos = Array.isArray(servico.topicos) ? servico.topicos : [];
+  const faq = topicos.filter((t: any) => t?.nivel === 'h3');
+  const corpo = topicos.filter((t: any) => t?.nivel !== 'h3');
+  const faqSchema = faq.length
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faq.map((q: any) => ({
+          '@type': 'Question',
+          name: q.titulo,
+          acceptedAnswer: { '@type': 'Answer', text: q.conteudo },
+        })),
+      }
+    : null;
+  const waMsg = `Olá! Quero um orçamento de ${servico.nome.toLowerCase()}.`;
+  // atribuição de conversão: hub não tem cidade → "{servico.slug}|hub"
+  const origem = `${servico.slug}|hub`;
+  hub = { servico, locais, title, description, faq, corpo, faqSchema, waMsg, origem };
+}
+
+// ===== POST (blog) =====
+let postCtx: any = null;
+if (kind === 'post') {
+  const post = props.post;
+  const { Content } = await post.render();
+  const data = post.data;
+  const catColor = colorForCategory(data.category);
+  const readingMinutes = (() => {
+    try {
+      const text = (post.body || '') as string;
+      const words = text.split(/\s+/).length;
+      return Math.max(1, Math.round(words / 200));
+    } catch { return 5; }
+  })();
+  const allPosts = await getCollection('blog');
+  const otherPosts = allPosts.filter((p: any) => (p.slug ?? p.id) !== (post.slug ?? post.id));
+  const related = otherPosts.slice(0, 3);
+  const videoUrl = data.videoUrl || '';
+  const videoInfo = videoUrl ? parseVideoUrl(videoUrl) : null;
+  const hasValidVideo = videoInfo && videoInfo.provider !== 'unknown';
+  const videoPosition = data.videoPosition || 'after-hero';
+  const rawBody = (post.body || '') as string;
+  const isHtmlBody = /^\s*</.test(rawBody.trim());
+  const processedHtml = isHtmlBody && hasShortcodes(rawBody) ? renderShortcodes(rawBody) : null;
+  postCtx = { post, Content, data, catColor, readingMinutes, related, videoUrl, hasValidVideo, videoPosition, processedHtml };
+}
+const PostContent = postCtx?.Content;
+---
+
+{kind === 'hub' ? (
+  <BaseLayout title={hub.title} description={hub.description} image={hub.servico.imagem}>
+    <Fragment slot="head">
+      {hub.faqSchema && <script type="application/ld+json" set:html={JSON.stringify(hub.faqSchema)} />}
+    </Fragment>
+    <LocalBusinessSchema />
+    <BreadcrumbSchema items={[{ name: 'Início', url: '/' }, { name: hub.servico.nome, url: `/${hub.servico.slug}` }]} />
+
+    <!-- ===== HERO com imagem + overlay + CTA WHATSAPP (paridade com a matriz) ===== -->
+    <section class="relative isolate overflow-hidden bg-ink border-b border-rule">
+      {hub.servico.imagem && (
+        <img
+          src={hub.servico.imagem}
+          alt=""
+          aria-hidden="true"
+          fetchpriority="high"
+          decoding="async"
+          class="absolute inset-0 -z-10 h-full w-full object-cover opacity-60"
+        />
+      )}
+      <div class="absolute inset-0 -z-10 bg-gradient-to-r from-ink/90 via-ink/75 to-ink/40" aria-hidden="true"></div>
+      <div class="container-x pt-20 md:pt-28 pb-16 md:pb-24">
+        <div class="max-w-3xl">
+          <p class="eyebrow mb-5" style="color:rgb(147 197 253)">serviço</p>
+          <h1 class="font-display text-3xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.04] tracking-tight">
+            {hub.servico.nome}
+          </h1>
+          {hub.servico.resumo && (
+            <p class="text-lg md:text-xl text-slate-200 leading-relaxed mt-6 max-w-xl">{hub.servico.resumo}</p>
+          )}
+          <div class="mt-8 flex flex-wrap items-center gap-4">
+            <WhatsappCta mensagem={hub.waMsg} />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CORPO — LAYOUT 2 COLUNAS (conteúdo + sidebar sticky com form) ===== -->
+    <section class="border-b border-rule">
+      <div class="container-x py-12 md:py-16">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+          <!-- COLUNA PRINCIPAL — tópicos + FAQ -->
+          <div class="lg:col-span-8 space-y-12 md:space-y-16">
+            <!-- Tópicos do serviço (h2/h4) -->
+            {hub.corpo.length > 0 && (
+              <div class="max-w-3xl">
+                <p class="eyebrow mb-4">sobre o serviço</p>
+                <h2 class="font-display text-2xl md:text-3xl font-bold tracking-tight text-ink leading-[1.1] mb-8">
+                  {hub.servico.nome}: o que você precisa saber
+                </h2>
+                <div class="space-y-8">
+                  {hub.corpo.map((t: any) => {
+                    const Heading: any = ['h2', 'h4'].includes(t.nivel) ? t.nivel : 'h2';
+                    const size = t.nivel === 'h4' ? 'text-base md:text-lg' : 'text-xl md:text-2xl';
+                    return (
+                      <div>
+                        <Heading class={`${size} font-display font-bold tracking-tight text-ink leading-tight`}>
+                          {t.titulo}
+                        </Heading>
+                        {t.conteudo && <div class="prose-msia mt-3" set:html={marked.parse(t.conteudo)} />}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <!-- FAQ (tópicos h3) -->
+            {hub.faq.length > 0 && (
+              <div class="max-w-3xl">
+                <p class="eyebrow mb-4">dúvidas frequentes</p>
+                <h2 class="font-display text-2xl md:text-3xl font-bold tracking-tight text-ink leading-[1.1] mb-8">
+                  Perguntas frequentes sobre {hub.servico.nome.toLowerCase()}
+                </h2>
+                <div class="divide-y divide-rule border-t border-rule">
+                  {hub.faq.map((q: any) => (
+                    <details class="group py-5">
+                      <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-display text-lg text-ink">
+                        {q.titulo}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 text-ink-faint group-open:rotate-45 transition-transform" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      </summary>
+                      <p class="text-ink-muted leading-relaxed mt-3">{q.conteudo}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <!-- SIDEBAR — form flutuante (sticky no desktop, empilha no mobile) -->
+          <aside class="lg:col-span-4">
+            <div class="lg:sticky lg:top-24">
+              <LeadFormSidebar
+                origem={hub.origem}
+                titulo="Peça seu orçamento"
+                waMensagem={hub.waMsg}
+              />
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ATENDIMENTO POR CIDADE (links pra matriz aninhada /{local}/{servico}) — diferencial do hub -->
+    {hub.locais.length > 0 && (
+      <section class="border-b border-rule">
+        <div class="container-x py-12 md:py-16">
+          <p class="eyebrow mb-4">onde atendemos</p>
+          <h2 class="font-display text-2xl md:text-3xl font-bold tracking-tight text-ink leading-[1.1] mb-8 max-w-2xl">
+            {hub.servico.nome} por cidade
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-rule border border-rule">
+            {hub.locais.map((local: any) => (
+              <a href={matrixUrl(hub.servico.slug, local.slug)} class="group bg-bg p-6 hover:bg-elev transition-colors flex items-center justify-between gap-3">
+                <span class="font-display text-lg text-ink">{local.nome} <span class="text-ink-faint">/ {local.uf}</span></span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-ink-faint group-hover:text-primary transition-colors shrink-0" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- CONTATO / NAP -->
+    <section class="border-b border-rule">
+      <div class="container-x py-12 md:py-16">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start">
+          <div class="md:col-span-6">
+            <p class="eyebrow mb-4">peça agora</p>
+            <h2 class="font-display text-2xl md:text-3xl font-bold tracking-tight text-ink leading-[1.1] mb-6">
+              Orçamento de {hub.servico.nome.toLowerCase()}
+            </h2>
+            <WhatsappCta mensagem={hub.waMsg} />
+          </div>
+          <div class="md:col-span-5 md:col-start-8">
+            <div class="mono uppercase text-ink-faint mb-4 pb-3 border-b border-rule">como nos encontrar</div>
+            <NapBlock variant="full" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </BaseLayout>
+) : kind === 'page' ? (
+  <BaseLayout title={props.page.title} description={props.page.description}>
+    <BlockRenderer blocks={props.page.blocks as Block[]} />
+  </BaseLayout>
+) : (
+  <BaseLayout
+    title={postCtx.data.title}
+    description={postCtx.data.description || ''}
+    image={postCtx.data.heroImage || postCtx.data.cover || ''}
+    type="article"
+  >
+    <article>
+      <!-- HERO BLOCK — cor da categoria dominante -->
+      <header class={`bg-cat-${postCtx.catColor} relative overflow-hidden isolate`}>
+        <span class="color-block-num" style="bottom:-4rem;right:-2rem;font-size:clamp(16rem,40vw,32rem)">
+          {String(postCtx.data.order || '#').padStart(2, '0')}
+        </span>
+
+        <div class="container-x relative z-10 pt-16 md:pt-24 pb-20 md:pb-28">
+          <nav class="mono opacity-75 mb-12" aria-label="Breadcrumb">
+            <a href="/" class="hover:opacity-100 transition-opacity">início</a>
+            <span class="mx-2 opacity-60">/</span>
+            {postCtx.data.category && (
+              <>
+                <a href={`/categoria/${getCategorySlug(postCtx.data.category, allCategories)}`} class="hover:opacity-100 transition-opacity uppercase">
+                  {postCtx.data.category}
+                </a>
+                <span class="mx-2 opacity-60">/</span>
+              </>
+            )}
+            <span class="opacity-100">leitura atual</span>
+          </nav>
+
+          <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.02] tracking-tight text-white max-w-4xl mb-8">
+            {postCtx.data.title}
+          </h1>
+
+          {postCtx.data.description && (
+            <p class="text-xl md:text-2xl leading-snug max-w-3xl text-white/85 mb-12">
+              {postCtx.data.description}
+            </p>
+          )}
+
+          <div class="mono uppercase text-white/70 flex items-center gap-3 flex-wrap pt-6 border-t border-white/20">
+            <span>{fmtDate(postCtx.data.pubDate || postCtx.data.date)}</span>
+            <span class="opacity-50">·</span>
+            <span>{postCtx.readingMinutes} min</span>
+            {postCtx.data.author && (<><span class="opacity-50">·</span><span>por {postCtx.data.author}</span></>)}
+          </div>
+        </div>
+      </header>
+
+      {postCtx.hasValidVideo && postCtx.videoPosition === 'hero' ? (
+        <div class="border-b border-rule">
+          <div class="container-x py-8">
+            <PostVideo
+              url={postCtx.videoUrl}
+              title={postCtx.data.title}
+              description={postCtx.data.description}
+              uploadDate={(postCtx.data.pubDate || postCtx.data.date) instanceof Date ? (postCtx.data.pubDate || postCtx.data.date).toISOString() : String(postCtx.data.pubDate || postCtx.data.date || '')}
+              lite={true}
+            />
+          </div>
+        </div>
+      ) : (postCtx.data.heroImage || postCtx.data.cover || postCtx.data.coverImage) ? (
+        <div class="border-b border-rule">
+          <div class="container-x py-8">
+            <img
+              src={postCtx.data.heroImage || postCtx.data.cover || postCtx.data.coverImage}
+              alt=""
+              class="w-full aspect-[21/9] object-cover"
+              loading="eager"
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {postCtx.hasValidVideo && postCtx.videoPosition === 'after-hero' && (
+        <div class="border-b border-rule">
+          <div class="container-x py-8">
+            <PostVideo
+              url={postCtx.videoUrl}
+              title={postCtx.data.title}
+              description={postCtx.data.description}
+              uploadDate={(postCtx.data.pubDate || postCtx.data.date) instanceof Date ? (postCtx.data.pubDate || postCtx.data.date).toISOString() : String(postCtx.data.pubDate || postCtx.data.date || '')}
+              lite={true}
+            />
+          </div>
+        </div>
+      )}
+
+      <!-- CONTEÚDO DO POST -->
+      <div class="container-x py-16 md:py-24">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+          <div class="lg:col-span-8 lg:col-start-2">
+            <div class="prose-msia max-w-none">
+              {postCtx.processedHtml ? (
+                <Fragment set:html={postCtx.processedHtml} />
+              ) : (
+                <PostContent />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCOS RELACIONADOS -->
+      {postCtx.related.length > 0 && (
+        <section class="border-t border-rule">
+          <div class="container-x py-14 md:py-20">
+            <p class="mono uppercase text-ink-faint mb-8">continuar lendo</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+              {postCtx.related.map((p: any, i: number) => {
+                const c = colorForCategory(p.data.category, i);
+                const s = p.slug ?? p.id;
+                return (
+                  <a href={`/${s}`} class={`color-block color-block-md bg-cat-${c} group`}>
+                    <span class="color-block-num">{String(i + 1).padStart(2, '0')}</span>
+                    <div>
+                      <p class="mono uppercase opacity-80 mb-3">{p.data.category}</p>
+                      <h3 class="font-display text-xl md:text-2xl font-bold leading-[1.1] tracking-tight">
+                        {p.data.title}
+                      </h3>
+                    </div>
+                    <span class="mono uppercase mt-4 inline-flex items-center gap-2 self-start border-b border-current pb-1 group-hover:gap-3 transition-all">
+                      abrir
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+    </article>
+  </BaseLayout>
+)}

@@ -1,0 +1,45 @@
+---
+/**
+ * LocalBusinessSchema.astro — JSON-LD LocalBusiness a partir do config.json (NAP fonte única).
+ * Use na Home e nas páginas serviço × cidade.
+ */
+import { getConfig, napEndereco, telDigits } from '../../lib/themeData';
+import { readData } from '../../lib/readData';
+
+interface Props {
+  /** Nome da área servida (cidade) — opcional, pra páginas locais. */
+  areaServida?: string;
+}
+const { areaServida } = Astro.props;
+
+const c = getConfig();
+const siteConfig = readData('siteConfig.json');
+const siteUrl = siteConfig.url || Astro.site || Astro.url.origin;
+const e = c.endereco || {};
+
+const schema: Record<string, any> = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: c.nome,
+  url: String(siteUrl),
+  telephone: c.telefone,
+  email: c.email,
+  priceRange: c.priceRange || '$$',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: e.rua,
+    addressLocality: e.cidade,
+    addressRegion: e.uf,
+    postalCode: e.cep,
+    addressCountry: 'BR',
+  },
+  openingHours: c.horario,
+};
+
+if (siteConfig.logo) schema.image = new URL(siteConfig.logo, siteUrl).toString();
+if (e.cidade) schema.areaServed = areaServida || e.cidade;
+if (c.lat && c.lng) schema.geo = { '@type': 'GeoCoordinates', latitude: c.lat, longitude: c.lng };
+const redes = [c.redes?.instagram, c.redes?.facebook].filter(Boolean);
+if (redes.length) schema.sameAs = redes;
+---
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

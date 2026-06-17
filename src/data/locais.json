@@ -1,0 +1,56 @@
+[
+  {
+    "slug": "sao-paulo",
+    "nome": "São Paulo",
+    "uf": "SP",
+    "prep": "em",
+    "regiao": "Capital paulista e Grande São Paulo",
+    "bairrosVizinhos": ["Mooca", "Tatuapé", "Santana", "Pinheiros", "Vila Mariana", "Centro", "Penha", "Ipiranga", "Lapa", "Vila Prudente"],
+    "referenciaLocal": "Atendemos toda a cidade de São Paulo, da Zona Leste à região central, com base de operação perto da Marginal Tietê. Entregamos no canteiro em bairros como Mooca, Tatuapé, Santana, Pinheiros e Vila Mariana, e cobrimos obra de sobrado, prédio antigo do centro e empreendimento alto da zona oeste.",
+    "faq": [
+      { "q": "Vocês entregam na Zona Leste de São Paulo?", "a": "Sim. Atendemos Tatuapé, Mooca, Penha e bairros vizinhos da Zona Leste, com entrega no canteiro no dia combinado." },
+      { "q": "Atendem obra em prédio antigo do centro de SP?", "a": "Atendemos. Em prédio antigo da região central, conferimos os pontos de amarração antes de subir, para a estrutura ficar firme sem danificar a fachada." },
+      { "q": "Em quanto tempo a entrega chega na capital?", "a": "Combinamos a data na hora do orçamento. Como a base fica perto da Marginal Tietê, atendemos a cidade toda em prazo curto, com o material conferido." },
+      { "q": "Vocês fazem montagem em São Paulo ou só entregam?", "a": "Os dois. Entregamos as peças no canteiro e, se a obra não tiver equipe própria, mandamos montadores treinados para montar e desmontar conforme a NR-18." },
+      { "q": "Atendem a zona oeste, tipo Pinheiros e Lapa?", "a": "Atendemos. Pinheiros, Lapa, Vila Mariana e a faixa oeste entram na nossa rota; é só passar o endereço da obra." }
+    ],
+    "lat": "",
+    "lng": ""
+  },
+  {
+    "slug": "guarulhos",
+    "nome": "Guarulhos",
+    "uf": "SP",
+    "prep": "em",
+    "regiao": "Grande São Paulo",
+    "bairrosVizinhos": ["Centro", "Vila Galvão", "Pimentas", "Bonsucesso", "Cumbica", "Taboão", "Jardim Maia", "Picanço"],
+    "referenciaLocal": "Atendemos Guarulhos inteira, da região do Aeroporto e de Cumbica à faixa da Rodovia Presidente Dutra. É uma cidade de muito galpão, prédio comercial e obra industrial, e levamos o material direto ao canteiro no Centro, Vila Galvão, Bonsucesso e na região dos Pimentas.",
+    "faq": [
+      { "q": "Atendem obra perto do Aeroporto de Guarulhos?", "a": "Atendemos. A região do Aeroporto, de Cumbica e da Dutra concentra galpão e prédio comercial, e entregamos o material montado no canteiro." },
+      { "q": "Vocês cobrem o bairro dos Pimentas?", "a": "Cobrimos. Pimentas, Bonsucesso e Vila Galvão entram na nossa rota de entrega em Guarulhos." },
+      { "q": "Atendem obra industrial e de galpão na Dutra?", "a": "Atendemos. A faixa da Presidente Dutra tem muita planta e galpão; para obra industrial fazemos visita técnica antes do orçamento." },
+      { "q": "Quanto tempo leva a entrega em Guarulhos?", "a": "Combinamos a data no orçamento. Atendemos a cidade toda, do Centro a Cumbica, com o material conferido e entregue no dia marcado." },
+      { "q": "Vocês montam o andaime ou só entregam em Guarulhos?", "a": "Os dois. Entregamos as peças e, se a obra precisar, mandamos equipe treinada para montar e desmontar dentro da norma." }
+    ],
+    "lat": "",
+    "lng": ""
+  },
+  {
+    "slug": "osasco",
+    "nome": "Osasco",
+    "uf": "SP",
+    "prep": "em",
+    "regiao": "Região oeste da Grande São Paulo",
+    "bairrosVizinhos": ["Centro", "Km 18", "Bela Vista", "Presidente Altino", "Vila Yara", "Rochdale", "Jardim D'Abril", "Quitaúna"],
+    "referenciaLocal": "Atendemos Osasco e a região oeste da Grande SP, da faixa da Rodovia Castelo Branco ao Km 18. A cidade combina comércio verticalizado perto do Centro com galpões e centros logísticos no Presidente Altino, e levamos o material conferido ao canteiro em toda a região.",
+    "faq": [
+      { "q": "Entregam no Km 18, em Osasco?", "a": "Entregamos. O Km 18 e o Centro de Osasco estão na nossa rota; levamos o material conferido até a obra." },
+      { "q": "Atendem a região da Castelo Branco?", "a": "Sim. A faixa da Rodovia Castelo Branco, o Presidente Altino e os centros logísticos da região são atendidos com entrega no canteiro." },
+      { "q": "Vocês cobrem o Presidente Altino e os galpões da região?", "a": "Cobrimos. Presidente Altino, Bela Vista e Km 18 entram na rota; atendemos tanto comércio do Centro quanto galpão e centro logístico." },
+      { "q": "Quanto tempo demora a entrega em Osasco?", "a": "Combinamos a data no orçamento. Atendemos a cidade e a região oeste da Grande SP com prazo curto e material conferido." },
+      { "q": "Vocês fazem a montagem em Osasco?", "a": "Fazemos. Entregamos as peças e, se a obra não tiver equipe, mandamos montadores treinados para montar e desmontar conforme a NR-18." }
+    ],
+    "lat": "",
+    "lng": ""
+  }
+]

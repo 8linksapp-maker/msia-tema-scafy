@@ -1,0 +1,18 @@
+---
+/**
+ * Bloco numeros — faixa de estatísticas sobre fundo azul corporativo.
+ */
+interface Stat { value: string; label: string; }
+interface Props { stats?: Stat[]; }
+const { stats = [] } = Astro.props;
+---
+<section class="bg-primary text-white">
+  <div class="container-x py-14 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+    {stats.map((s) => (
+      <div>
+        <p class="font-display text-4xl font-extrabold text-white">{s.value}</p>
+        <p class="mt-1 text-sm text-white/80">{s.label}</p>
+      </div>
+    ))}
+  </div>
+</section>

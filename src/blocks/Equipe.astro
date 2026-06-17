@@ -1,0 +1,30 @@
+---
+/**
+ * Bloco equipe — cards de pessoas/frota (nome + papel + foto).
+ * No nicho de andaimes serve pra "nossa equipe" ou "nossa frota/equipamentos".
+ */
+interface Member { name: string; role?: string; photo?: string; }
+interface Props { eyebrow?: string; title: string; members?: Member[]; }
+const { eyebrow, title, members = [] } = Astro.props;
+---
+<section class="border-b border-rule">
+  <div class="container-x py-14 md:py-20">
+    <div class="max-w-2xl mb-10 md:mb-12">
+      {eyebrow && <p class="eyebrow mb-4">{eyebrow}</p>}
+      <h2 class="font-display text-2xl md:text-4xl font-bold tracking-tight text-ink leading-[1.1]">{title}</h2>
+    </div>
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {members.map((m) => (
+        <article class="card-trade overflow-hidden">
+          <div class="aspect-[3/4] bg-surface">
+            {m.photo && <img src={m.photo} alt={m.name} loading="lazy" decoding="async" class="w-full h-full object-cover" />}
+          </div>
+          <div class="p-5">
+            <h3 class="font-display text-base font-bold text-ink">{m.name}</h3>
+            {m.role && <p class="text-sm text-primary">{m.role}</p>}
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

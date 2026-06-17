@@ -1,0 +1,336 @@
+---
+/**
+ * [local]/[servico].astro — matriz aninhada serviço × cidade (modelo Clinify).
+ * URL: /{local}/{servico} (ex /sao-paulo/andaime-fachadeiro).
+ * Conteúdo FATORADO: edita 1 cidade ou 1 serviço → nascem N páginas no build.
+ * Visual corporativo do andaimes (Inter, azul, card-trade, WhatsappCta, NAP).
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { readData } from '../../lib/readData';
+import { getServicos, getLocais, matrixUrl } from '../../lib/themeData';
+import { postUrl } from '../../lib/postUrl';
+import WhatsappCta from '../../components/theme/WhatsappCta.astro';
+import NapBlock from '../../components/theme/NapBlock.astro';
+import LeadFormSidebar from '../../components/theme/LeadFormSidebar.astro';
+import LocalBusinessSchema from '../../components/theme/LocalBusinessSchema.astro';
+import BreadcrumbSchema from '../../components/theme/BreadcrumbSchema.astro';
+import { marked } from 'marked';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const servicos = getServicos();
+  const locais = getLocais();
+  const paths = [];
+  for (const local of locais) {
+    for (const servico of servicos) {
+      paths.push({
+        params: { local: local.slug, servico: servico.slug },
+        props: { local, servico },
+      });
+    }
+  }
+  return paths;
+}
+
+const { local, servico } = Astro.props as any;
+const prep = local.prep || 'em';
+
+const servicosList = getServicos();
+const siteConfig = readData('siteConfig.json');
+
+const h1 = `${servico.nome} ${prep} ${local.nome}`;
+const title = `${servico.nome} ${prep} ${local.nome}`;
+const description = `${servico.nome} ${prep} ${local.nome}: ${servico.resumo} ${local.referenciaLocal}`.slice(0, 160);
+
+const topicos = Array.isArray(servico.topicos) ? servico.topicos : [];
+const faqLocal = Array.isArray(local.faq) ? local.faq : [];
+
+const waMsg = `Olá! Quero um orçamento de ${servico.nome.toLowerCase()} ${prep} ${local.nome}.`;
+
+// atribuição de conversão: qual página (serviço × cidade) gerou o lead
+const origem = `${servico.slug}|${local.slug}`;
+
+const faqSchema = faqLocal.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqLocal.map((f: any) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    }
+  : null;
+
+// Últimas do blog
+const allPosts = await getCollection('blog');
+const posts = allPosts
+  .sort((a: any, b: any) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime())
+  .slice(0, 3);
+
+function fmtShort(d: any): string {
+  if (!d) return '';
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return '';
+  return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+}
+---
+
+<BaseLayout title={title} description={description} image={servico.imagem}>
+  <Fragment slot="head">
+    {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
+  </Fragment>
+  <LocalBusinessSchema areaServida={[local.nome, ...(local.bairrosVizinhos || [])].join(', ')} />
+  <BreadcrumbSchema
+    items={[
+      { name: 'Início', url: '/' },
+      { name: local.nome, url: `/${local.slug}` },
+      { name: servico.nome, url: matrixUrl(servico.slug, local.slug) },
+    ]}
+  />
+
+  <!-- ===== SEÇÃO 1 — HERO com imagem + overlay + CTA WHATSAPP ===== -->
+  <section class="relative isolate overflow-hidden bg-ink border-b border-rule">
+    {servico.imagem && (
+      <img
+        src={servico.imagem}
+        alt=""
+        aria-hidden="true"
+        fetchpriority="high"
+        decoding="async"
+        class="absolute inset-0 -z-10 h-full w-full object-cover opacity-60"
+      />
+    )}
+    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-ink/90 via-ink/75 to-ink/40" aria-hidden="true"></div>
+    <div class="container-x pt-20 md:pt-28 pb-16 md:pb-24">
+      <div class="max-w-3xl">
+        <p class="eyebrow mb-5" style="color:rgb(147 197 253)">{local.nome} · {local.uf}</p>
+        <h1 class="font-display text-3xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.04] tracking-tight">
+          {h1}
+        </h1>
+        {servico.resumo && (
+          <p class="text-lg md:text-xl text-slate-200 leading-relaxed mt-6 max-w-xl">{servico.resumo}</p>
+        )}
+        <div class="mt-8 flex flex-wrap items-center gap-4">
+          <WhatsappCta mensagem={waMsg} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CORPO — LAYOUT 2 COLUNAS (conteúdo + sidebar sticky com form) ===== -->
+  <section class="border-b border-rule">
+    <div class="container-x py-12 md:py-16">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+        <!-- COLUNA PRINCIPAL — intro + tópicos + FAQ -->
+        <div class="lg:col-span-8 space-y-12 md:space-y-16">
+          <!-- Intro / atendimento (referenciaLocal rica, realocada do hero) -->
+          {local.referenciaLocal && (
+            <div class="max-w-3xl">
+              <p class="eyebrow mb-4">atendimento {prep} {local.nome}</p>
+              <p class="text-lg md:text-xl text-ink-muted leading-relaxed">{local.referenciaLocal}</p>
+            </div>
+          )}
+
+          <!-- Tópicos do serviço (markdown via marked) -->
+          {topicos.length > 0 && (
+            <div class="max-w-3xl">
+              <p class="eyebrow mb-4">sobre o serviço</p>
+              <h2 class="font-display text-2xl md:text-3xl font-bold tracking-tight text-ink leading-[1.1] mb-8">
+                {servico.nome} {prep} {local.nome}: o que você precisa saber
+              </h2>
+              <div class="space-y-8">
+                {topicos.map((t: any) => {
+                  const item = typeof t === 'string' ? { nivel: 'h2', titulo: t, conteudo: '' } : t;
+                  const Heading: any = ['h2', 'h3', 'h4'].includes(item.nivel) ? item.nivel : 'h2';
+                  const size =
+                    item.nivel === 'h3'
+                      ? 'text-lg md:text-xl'
+                      : item.nivel === 'h4'
+                      ? 'text-base md:text-lg'
+                      : 'text-xl md:text-2xl';
+                  return (
+                    <div>
+                      <Heading class={`${size} font-display font-bold tracking-tight text-ink leading-tight`}>
+                        {item.titulo}
+                      </Heading>
+                      {item.conteudo && (
+                        <div class="prose-msia mt-3" set:html={marked.parse(item.conteudo)} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <!-- FAQ da cidade -->
+          {faqLocal.length > 0 && (
+            <div class="max-w-3xl">
+              <p class="eyebrow mb-4">dúvidas {prep} {local.nome}</p>
+              <h2 class="font-display text-2xl md:text-3xl font-bold tracking-tight text-ink leading-[1.1] mb-8">
+                Perguntas frequentes sobre {servico.nome.toLowerCase()} {prep} {local.nome}
+              </h2>
+              <div class="divide-y divide-rule border-t border-rule">
+                {faqLocal.map((f: any) => (
+                  <details class="group py-5">
+                    <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-display text-lg text-ink">
+                      {f.q}
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 text-ink-faint group-open:rotate-45 transition-transform" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </summary>
+                    <p class="text-ink-muted leading-relaxed mt-3">{f.a}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <!-- SIDEBAR — form flutuante (sticky no desktop, empilha no mobile) -->
+        <aside class="lg:col-span-4">
+          <div class="lg:sticky lg:top-24">
+            <LeadFormSidebar
+              origem={origem}
+              titulo={`Orçamento ${prep} ${local.nome}`}
+              waMensagem={waMsg}
+            />
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SEÇÃO 3 — GRID DE SERVIÇOS (links /{local}/{servico}) ===== -->
+  <section class="border-b border-rule">
+    <div class="container-x py-12 md:py-16">
+      <p class="eyebrow mb-4">outros serviços {prep} {local.nome}</p>
+      <h2 class="font-display text-2xl md:text-3xl font-bold tracking-tight text-ink leading-[1.1] mb-8 max-w-2xl">
+        O que alugamos {prep} {local.nome}
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {servicosList
+          .filter((s) => s.slug !== servico.slug)
+          .map((s) => (
+            <a href={matrixUrl(s.slug, local.slug)} class="card-trade group flex flex-col overflow-hidden">
+              {s.imagem && (
+                <img
+                  src={s.imagem}
+                  alt={s.nome}
+                  loading="lazy"
+                  decoding="async"
+                  class="w-full aspect-[16/10] object-cover"
+                />
+              )}
+              <div class="p-6 md:p-7 flex flex-col gap-3 flex-1">
+                <h3 class="font-display text-lg md:text-xl font-bold tracking-tight text-ink leading-tight group-hover:text-primary transition-colors">
+                  {s.nome} {prep} {local.nome}
+                </h3>
+                {s.resumo && (
+                  <p class="text-sm text-ink-muted leading-relaxed line-clamp-3">{s.resumo}</p>
+                )}
+                <span class="text-sm font-semibold text-primary mt-auto pt-2 inline-flex items-center gap-2 group-hover:gap-3 transition-all">
+                  Ver detalhes
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </span>
+              </div>
+            </a>
+          ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SEÇÃO 5 — COMO NOS ENCONTRAR (NAP) ===== -->
+  <section class="border-b border-rule">
+    <div class="container-x py-12 md:py-16">
+      <p class="eyebrow mb-4">como nos encontrar</p>
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start">
+        <div class="md:col-span-5 space-y-6">
+          {local.bairrosVizinhos?.length > 0 && (
+            <div>
+              <div class="mono uppercase text-ink-faint mb-3 pb-2 border-b border-rule">bairros atendidos</div>
+              <ul class="flex flex-wrap gap-2">
+                {local.bairrosVizinhos.map((b: string) => (
+                  <li class="text-sm text-ink border border-rule rounded px-2.5 py-1">{b}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <NapBlock variant="full" />
+        </div>
+        <div class="md:col-span-6 md:col-start-7">
+          <div class="w-full h-[380px] bg-elev border border-rule rounded flex items-center justify-center">
+            <div class="text-center p-6">
+              <p class="mono uppercase text-ink-faint mb-2">{local.regiao || local.nome}</p>
+              <p class="text-sm text-ink-faint">Atendimento {prep} {local.nome} e região</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SEÇÃO 6 — ÚLTIMAS DO BLOG ===== -->
+  {posts.length > 0 && (
+    <section class="border-b border-rule">
+      <div class="container-x py-12 md:py-16">
+        <div class="flex items-end justify-between mb-10 gap-4 flex-wrap">
+          <div>
+            <p class="eyebrow mb-4">conteúdo</p>
+            <h2 class="font-display text-2xl md:text-3xl font-bold tracking-tight text-ink leading-[1.1]">
+              Dicas e guias sobre andaimes
+            </h2>
+          </div>
+          <a href="/blog" class="mono uppercase text-ink-faint inline-flex items-center gap-2 hover:text-primary hover:gap-3 transition-all">
+            todos os artigos
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {posts.map((post: any) => {
+            const slug = post.slug ?? post.id;
+            const thumb = post.data.heroImage || post.data.cover || post.data.coverImage;
+            return (
+              <a href={postUrl(slug)} class="card-trade group block overflow-hidden">
+                {thumb && (
+                  <img src={thumb} alt="" loading="lazy" decoding="async" class="w-full aspect-[16/9] object-cover" />
+                )}
+                <div class="p-6">
+                  <p class="mono uppercase text-ink-faint mb-3">{post.data.category} · {fmtShort(post.data.pubDate)}</p>
+                  <h3 class="font-display text-xl font-bold tracking-tight text-ink leading-tight mb-2 group-hover:text-primary transition-colors">
+                    {post.data.title}
+                  </h3>
+                  {post.data.description && (
+                    <p class="text-sm text-ink-muted leading-relaxed line-clamp-3">{post.data.description}</p>
+                  )}
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- ===== SEÇÃO 7 — CTA CONTATO ===== -->
+  <section class="border-b border-rule">
+    <div class="container-x py-12 md:py-16">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start">
+        <div class="md:col-span-6">
+          <p class="eyebrow mb-4">peça agora</p>
+          <h2 class="font-display text-2xl md:text-3xl font-bold tracking-tight text-ink leading-[1.1] mb-6">
+            Orçamento de {servico.nome.toLowerCase()} {prep} {local.nome}
+          </h2>
+          <WhatsappCta mensagem={waMsg} />
+        </div>
+        <div class="md:col-span-5 md:col-start-8">
+          <div class="mono uppercase text-ink-faint mb-4 pb-3 border-b border-rule">como nos encontrar</div>
+          <NapBlock variant="full" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Seção 8 (rodapé com NAP idêntico) vem do Footer.astro do BaseLayout -->
+</BaseLayout>

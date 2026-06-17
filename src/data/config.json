@@ -1,0 +1,19 @@
+{
+  "nome": "Andaimes São Paulo Locações",
+  "telefone": "(11) 4002-8922",
+  "whatsapp": "5511990000000",
+  "email": "contato@andaimessaopaulo.com.br",
+  "endereco": {
+    "rua": "Av. das Locações, 1500 - Galpão 4",
+    "bairro": "Vila Maria",
+    "cidade": "São Paulo",
+    "uf": "SP",
+    "cep": "02114-000"
+  },
+  "horario": "Seg a Sex 7h às 18h · Sáb 8h às 12h · Entrega sob agendamento",
+  "redes": {
+    "instagram": "https://instagram.com/andaimessaopaulo",
+    "facebook": "https://facebook.com/andaimessaopaulo"
+  },
+  "priceRange": "$$"
+}

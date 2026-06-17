@@ -1,0 +1,54 @@
+---
+/**
+ * Bloco novidades — últimos posts do blog (fallback pros items das props).
+ * Cards card-trade idênticos à seção de blog da home.
+ */
+import { getCollection } from 'astro:content';
+import { postUrl } from '../lib/postUrl';
+interface Item { title: string; excerpt?: string; image?: string; href: string; }
+interface Props { eyebrow?: string; title: string; items?: Item[]; }
+const { eyebrow, title, items = [] } = Astro.props;
+
+let fromCollection: Item[] = [];
+try {
+  const all = await getCollection('blog', ({ data }: any) => !data.draft);
+  fromCollection = all
+    .sort((a: any, b: any) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime())
+    .slice(0, 3)
+    .map((p: any) => ({
+      title: p.data.title,
+      excerpt: p.data.description,
+      image: p.data.heroImage || p.data.cover || p.data.coverImage,
+      href: postUrl(p.slug ?? p.id),
+    }));
+} catch { /* coleção ainda não disponível */ }
+
+const cards = fromCollection.length > 0 ? fromCollection : items;
+---
+<section class="bg-surface border-b border-rule">
+  <div class="container-x py-14 md:py-20">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-10 md:mb-12">
+      <div class="max-w-2xl">
+        {eyebrow && <p class="eyebrow mb-4">{eyebrow}</p>}
+        <h2 class="font-display text-2xl md:text-4xl font-bold tracking-tight text-ink leading-[1.1]">{title}</h2>
+      </div>
+      <a href="/blog" class="mono uppercase text-ink-faint inline-flex items-center gap-2 hover:text-primary hover:gap-3 transition-all">
+        todos os artigos
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {cards.map((p) => (
+        <a href={p.href} class="card-trade group block overflow-hidden bg-bg">
+          {p.image && (
+            <img src={p.image} alt="" loading="lazy" decoding="async" class="w-full aspect-[16/9] object-cover" />
+          )}
+          <div class="p-6">
+            <h3 class="font-display text-xl font-bold tracking-tight text-ink leading-tight mb-2 group-hover:text-primary transition-colors">{p.title}</h3>
+            {p.excerpt && <p class="text-sm text-ink-muted leading-relaxed line-clamp-3">{p.excerpt}</p>}
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>

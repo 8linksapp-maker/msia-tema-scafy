@@ -1,0 +1,12 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import PageEditor from '../../components/admin/PageEditor';
+---
+<AdminLayout title="Páginas" activeSection="paginas">
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-ink">Páginas</h1>
+        <p class="text-ink-muted mt-1">Crie e edite páginas de blocos (page-builder). Cada página vira uma URL própria no site.</p>
+    </div>
+    <PageEditor client:load />
+</AdminLayout>

@@ -1,0 +1,60 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import servicos from '../../data/servicos.json';
+import locais from '../../data/locais.json';
+
+// Matriz local × serviço — espelha a rota aninhada /{local}/{servico}.
+const matriz: { servico: string; local: string; url: string }[] = [];
+for (const l of locais as any[]) {
+  for (const s of servicos as any[]) {
+    matriz.push({ servico: s.nome, local: `${l.nome}${l.uf ? ` / ${l.uf}` : ''}`, url: `/${l.slug}/${s.slug}` });
+  }
+}
+---
+<AdminLayout title="Matriz SEO Local" activeSection="matriz">
+  <div class="flex items-end justify-between gap-4 mb-2">
+    <div>
+      <h1 class="text-2xl font-bold text-ink">Matriz SEO Local</h1>
+      <p class="text-ink-muted text-sm mt-1">{matriz.length} URLs geradas · {(locais as any[]).length} localidades × {(servicos as any[]).length} serviços. Somente leitura — edite em Serviços e Localidades.</p>
+    </div>
+    <input id="busca" type="search" placeholder="Filtrar por serviço, local ou URL…" class="w-72 px-4 py-2 rounded-lg border border-border bg-surface text-ink text-sm" />
+  </div>
+
+  <div class="bg-surface border border-border rounded-xl overflow-hidden mt-6">
+    <table class="w-full text-sm">
+      <thead class="bg-elev text-ink-muted">
+        <tr>
+          <th class="text-left px-4 py-2.5 font-semibold">Localidade</th>
+          <th class="text-left px-4 py-2.5 font-semibold">Serviço</th>
+          <th class="text-left px-4 py-2.5 font-semibold">URL</th>
+          <th class="px-4 py-2.5"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {matriz.map((m) => (
+          <tr class="border-t border-border js-row" data-search={`${m.servico} ${m.local} ${m.url}`.toLowerCase()}>
+            <td class="px-4 py-2.5 text-ink">{m.local}</td>
+            <td class="px-4 py-2.5 text-ink-muted">{m.servico}</td>
+            <td class="px-4 py-2.5"><code class="text-primary">{m.url}</code></td>
+            <td class="px-4 py-2.5 text-right"><a href={m.url} target="_blank" rel="noopener" class="text-primary underline">abrir ↗</a></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  {matriz.length === 0 && (
+    <p class="text-ink-muted text-sm mt-4">Nenhuma combinação ainda. Cadastre serviços e localidades.</p>
+  )}
+
+  <script is:inline>
+    const inp = document.getElementById('busca');
+    inp && inp.addEventListener('input', () => {
+      const q = inp.value.trim().toLowerCase();
+      document.querySelectorAll('.js-row').forEach((r) => {
+        r.style.display = !q || (r.getAttribute('data-search') || '').includes(q) ? '' : 'none';
+      });
+    });
+  </script>
+</AdminLayout>

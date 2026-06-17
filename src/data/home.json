@@ -1,0 +1,29 @@
+{
+  "hero": {
+    "eyebrow": "Andaimes em São Paulo e Grande SP",
+    "title": "Aluguel de andaimes em São Paulo com entrega no canteiro",
+    "lead": "Andaime fachadeiro, tubular, torre móvel e balancim para obra, reforma e pintura. Montagem conforme a NR-18 e orçamento pelo WhatsApp em minutos.",
+    "ctaLabel": "Pedir orçamento no WhatsApp",
+    "imagem": ""
+  },
+  "servicosTitulo": "Tipos de andaime que alugamos",
+  "servicosSubtitulo": "Cada obra pede um tipo. Veja qual atende a sua e fale com a gente.",
+  "sobreResumo": {
+    "titulo": "Por que alugar com a gente",
+    "texto": "Levamos as peças contadas e conferidas ao endereço da obra, no dia combinado, e equipe treinada monta com contraventamento, guarda-corpo e base nivelada — em altura, com ART do responsável técnico. Loca por dia, semana ou mês, com prorrogação direta se a obra atrasar.",
+    "destaques": [
+      "Entrega no canteiro no dia combinado",
+      "Montagem conforme a NR-18",
+      "Aluguel por período flexível",
+      "Atendimento direto pelo WhatsApp"
+    ]
+  },
+  "comoEncontrar": {
+    "titulo": "Como nos encontrar",
+    "texto": "Atendemos a capital e cidades vizinhas da Grande SP com entrega no canteiro. Passe pelo galpão ou fale com a gente pelo WhatsApp para agendar a entrega.",
+    "mapEmbedUrl": ""
+  },
+  "blogTitulo": "Dicas e guias sobre andaimes",
+  "contatoTitulo": "Precisa de andaime para sua obra hoje?",
+  "contatoTexto": "Fale com a gente pelo WhatsApp. Indicamos o tipo certo, passamos o orçamento e agendamos a entrega no canteiro."
+}

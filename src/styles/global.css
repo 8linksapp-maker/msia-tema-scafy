@@ -1,0 +1,396 @@
+/* ===========================================================
+   theme-andaimes — Corporativo confiável (re-skin 2026-06-16)
+   Branco/gelo + ink slate + primary azul. Inter self-hosted.
+   Sem serif, sem drop-cap, sem color-blocks de portfólio no tema.
+   =========================================================== */
+
+/* ===== Inter self-hosted (woff2 latin, font-display: swap) ===== */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/inter-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/inter-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/inter-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/inter-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/inter-800.woff2') format('woff2');
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ===== Base canvas (branco / gelo) ===== */
+    --c-bg:          255 255 255;     /* #ffffff — branco */
+    --c-surface:     245 247 250;     /* #f5f7fa — gelo */
+    --c-elev:        245 247 250;     /* #f5f7fa — superfície elevada */
+    --c-border:      220 227 236;     /* #dce3ec — bordas */
+    --c-rule:        195 205 217;     /* #c3cdd9 — divisores */
+
+    /* ===== Ink slate ===== */
+    --c-ink:          15  23  42;     /* #0f172a — slate-900 */
+    --c-ink-muted:    71  85 105;     /* #475569 — slate-600 */
+    --c-ink-faint:   100 116 139;     /* #64748b — slate-500 (WCAG AA em branco) */
+
+    /* ===== Primary (azul corporativo) ===== */
+    --c-primary:      29  78 216;     /* #1d4ed8 — blue-700 */
+    --c-primary-soft: 219 234 254;    /* #dbeafe — blue-100 wash */
+
+    /* ===== Accent WhatsApp (verde) ===== */
+    --c-whatsapp:     22 163  74;     /* #16a34a — green-600 */
+
+    /* ===== 5 CATEGORIA COLORS (blog/CMS) — preservadas =====
+       Usadas pelo sistema de cor de categoria do blog (color-block).
+       Não fazem parte do tema corporativo; mantidas pro CMS. */
+    --cat-terracota:    197  92  62;   /* oklch(60% 0.16 30) — Comece aqui */
+    --cat-azul-tinta:    52  88 162;   /* oklch(42% 0.15 258) — Configuração */
+    --cat-oliva:         95 116  54;   /* oklch(48% 0.10 130) — Conteúdo */
+    --cat-ocre:         196 152  56;   /* oklch(68% 0.13 85) — Plugins */
+    --cat-vinho:        140  52  76;   /* oklch(42% 0.15 5) — Inspiração */
+
+    /* ===== Fonts (Inter workhorse — corpo E títulos) ===== */
+    --font-display: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-body:    'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.65;
+    color: rgb(var(--c-ink-muted));
+    background: rgb(var(--c-bg));
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'ss01', 'ss02';
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: rgb(var(--c-ink));
+    margin: 0;
+    font-family: var(--font-display);
+  }
+  /* Inter bold — corporativo confiável, peso 700/800, tracking levemente negativo */
+  h1 {
+    font-size: clamp(1.5rem, 3vw, 1.875rem);
+    line-height: 1.12;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+  h2 {
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  h3 { font-size: 1rem; line-height: 1.4; font-weight: 700; letter-spacing: -0.01em; }
+  h4 { font-size: 0.9375rem; line-height: 1.4; font-weight: 600; }
+
+  a { color: inherit; text-decoration: none; transition: color 0.15s ease; }
+
+  img, svg, video { max-width: 100%; height: auto; display: block; }
+
+  ::selection { background: rgb(var(--c-primary) / 0.15); color: rgb(var(--c-ink)); }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: rgb(var(--c-bg)); }
+  ::-webkit-scrollbar-thumb { background: rgb(var(--c-border)); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgb(var(--c-rule)); }
+}
+
+@layer components {
+  .container-x {
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .container-x { padding-inline: 2.5rem; }
+  }
+
+  .mono {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-feature-settings: 'ss01';
+    letter-spacing: 0;
+  }
+
+  /* ===== COLOR BLOCK — o post como porta colorida =====
+     Em light theme os blocos ganham CONTRASTE máximo. Mais vibrante. */
+  .color-block {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2rem;
+    color: rgb(248 248 246);
+    text-decoration: none;
+    overflow: hidden;
+    transition: filter 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    isolation: isolate;
+  }
+  .color-block:hover { filter: brightness(1.06) saturate(1.05); }
+  .color-block:active { transform: scale(0.995); }
+
+  /* numero gigante de fundo — texture sutil */
+  .color-block-num {
+    position: absolute;
+    bottom: -2rem;
+    right: -1.5rem;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(12rem, 28vw, 22rem);
+    line-height: 0.85;
+    color: rgba(255, 255, 255, 0.10);
+    pointer-events: none;
+    user-select: none;
+    z-index: -1;
+    letter-spacing: -0.05em;
+  }
+
+  /* size variants */
+  .color-block-lg { min-height: 60vh; padding: 3rem; }
+  .color-block-md { min-height: 32vh; }
+  @media (min-width: 768px) {
+    .color-block-lg { padding: 4rem; }
+    .color-block-md { min-height: 38vh; }
+  }
+
+  /* ===== Category bgs ===== */
+  .bg-cat-terracota { background: rgb(var(--cat-terracota)); }
+  .bg-cat-azul-tinta { background: rgb(var(--cat-azul-tinta)); }
+  .bg-cat-oliva { background: rgb(var(--cat-oliva)); }
+  .bg-cat-ocre { background: rgb(var(--cat-ocre)); color: rgb(20 20 24); }
+  .bg-cat-vinho { background: rgb(var(--cat-vinho)); }
+
+  /* ocre é claro, ink escuro pra WCAG */
+  .bg-cat-ocre .color-block-num { color: rgba(20, 20, 24, 0.10); }
+
+  /* category text colors (fora dos blocos) */
+  .text-cat-terracota { color: rgb(var(--cat-terracota)); }
+  .text-cat-azul-tinta { color: rgb(var(--cat-azul-tinta)); }
+  .text-cat-oliva { color: rgb(var(--cat-oliva)); }
+  .text-cat-ocre { color: rgb(var(--cat-ocre)); }
+  .text-cat-vinho { color: rgb(var(--cat-vinho)); }
+
+  /* ===== Sidebar items ===== */
+  .side-section + .side-section { margin-top: 3rem; }
+  .side-section-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: rgb(var(--c-ink-faint));
+    margin-bottom: 1rem;
+    padding-bottom: 0.625rem;
+    border-bottom: 1px solid rgb(var(--c-rule));
+  }
+
+  /* ===== Buttons — CTA corporativo (azul sólido, grande, peso 600) ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    line-height: 1.2;
+    border-radius: 6px;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+    letter-spacing: -0.005em;
+  }
+  /* primary = azul corporativo. Texto branco sobre #1d4ed8 = contraste 6.3:1 (AA). */
+  .btn-primary {
+    background: rgb(var(--c-primary));
+    color: #ffffff;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+  }
+  .btn-primary:hover { background: rgb(30 64 175); }
+  .btn-primary:active { transform: translateY(1px); }
+  /* WhatsApp CTA = verde (accent do nicho). Usa green-700 sólido (#15803d)
+     pra texto branco bater WCAG AA 5:1; o token #16a34a fica pros acentos. */
+  .btn-whatsapp {
+    background: rgb(21 128 61);
+    color: #ffffff;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+  }
+  .btn-whatsapp:hover { background: rgb(22 101 52); }
+  .btn-whatsapp:active { transform: translateY(1px); }
+  .btn-ghost {
+    background: transparent;
+    color: rgb(var(--c-ink));
+    border-color: rgb(var(--c-border));
+  }
+  .btn-ghost:hover { border-color: rgb(var(--c-ink)); }
+
+  /* ===== Card convencional (serviços / posts) ===== */
+  .card-trade {
+    background: rgb(var(--c-surface));
+    border: 1px solid rgb(var(--c-border));
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+    transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  }
+  .card-trade:hover {
+    box-shadow: 0 8px 24px -12px rgb(15 23 42 / 0.18);
+    border-color: rgb(var(--c-rule));
+    transform: translateY(-2px);
+  }
+
+  /* ===== Barra de confiança (selos do nicho sob o hero) ===== */
+  .trust-bar { background: rgb(var(--c-surface)); }
+  .trust-item { color: rgb(var(--c-ink-muted)); }
+  .trust-item svg { color: rgb(var(--c-primary)); }
+
+  /* ===== Category badge (preserva a cor do CMS, sem color-block) =====
+     Pílula com a cor de assinatura da categoria em wash + texto na cor cheia.
+     Usada no blog (listagem, post, categoria) no lugar do color-block. */
+  .badge-cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: #ffffff;
+  }
+  .badge-cat-terracota  { background: rgb(var(--cat-terracota)); }
+  .badge-cat-azul-tinta { background: rgb(var(--cat-azul-tinta)); }
+  .badge-cat-oliva      { background: rgb(var(--cat-oliva)); }
+  .badge-cat-ocre       { background: rgb(var(--cat-ocre)); color: rgb(20 20 24); }
+  .badge-cat-vinho      { background: rgb(var(--cat-vinho)); }
+
+  /* ===== Section eyebrow (caixa-alta azul) ===== */
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(var(--c-primary));
+  }
+
+  /* ===== Prose (post content) — light mode ===== */
+  .prose-msia {
+    font-size: 1.125rem;
+    line-height: 1.78;
+    color: rgb(var(--c-ink-muted));
+    max-width: 68ch;
+  }
+  .prose-msia h2 { margin: 3rem 0 1rem; font-size: 1.875rem; font-weight: 700; letter-spacing: -0.022em; color: rgb(var(--c-ink)); }
+  .prose-msia h3 { margin: 2.25rem 0 0.75rem; font-size: 1.375rem; font-weight: 700; color: rgb(var(--c-ink)); }
+  .prose-msia p { margin-bottom: 1.25rem; }
+  .prose-msia p strong { color: rgb(var(--c-ink)); font-weight: 600; }
+  .prose-msia a {
+    color: rgb(var(--c-ink));
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: rgb(var(--c-rule));
+  }
+  .prose-msia a:hover { text-decoration-color: currentColor; }
+  .prose-msia blockquote {
+    border-left: 2px solid rgb(var(--c-ink));
+    padding: 0.25rem 0 0.25rem 1.5rem;
+    margin: 2.5rem 0;
+    font-size: 1.5rem;
+    line-height: 1.4;
+    color: rgb(var(--c-ink));
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.018em;
+  }
+  .prose-msia code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    padding: 0.125em 0.375em;
+    background: rgb(var(--c-elev));
+    color: rgb(var(--c-ink));
+    border-radius: 2px;
+  }
+  .prose-msia pre {
+    background: rgb(var(--c-ink));
+    color: rgb(244 240 232);
+    padding: 1.25rem 1.5rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .prose-msia pre code { background: transparent; color: inherit; padding: 0; }
+  .prose-msia img { border-radius: 4px; margin: 2rem 0; }
+  .prose-msia ul, .prose-msia ol { padding-left: 1.5rem; margin: 1rem 0; }
+  .prose-msia li { margin-bottom: 0.5rem; }
+  .prose-msia hr { border: 0; border-top: 1px solid rgb(var(--c-rule)); margin: 3rem 0; }
+
+  /* listicle items */
+  .prose-msia .listicle-item {
+    border-top: 1px solid rgb(var(--c-rule));
+    padding-top: 2rem;
+    margin-top: 3rem;
+  }
+}
+
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

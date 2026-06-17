@@ -1,0 +1,255 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { readData } from '../lib/readData';
+import { getConfig, getServicos } from '../lib/themeData';
+import { postUrl } from '../lib/postUrl';
+import ServicosGrid from '../components/theme/ServicosGrid.astro';
+import NapBlock from '../components/theme/NapBlock.astro';
+import WhatsappCta from '../components/theme/WhatsappCta.astro';
+import TrustBar from '../components/theme/TrustBar.astro';
+import LocalBusinessSchema from '../components/theme/LocalBusinessSchema.astro';
+
+export const prerender = true;
+
+const siteConfig = readData('siteConfig.json');
+const home = readData('home.json', {}) as any;
+const config = getConfig();
+const servicos = getServicos();
+
+const siteUrl = siteConfig.url || Astro.url.origin;
+
+const allPosts = await getCollection('blog');
+const posts = allPosts.sort(
+  (a: any, b: any) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+).slice(0, 6);
+
+function fmtShort(d: any): string {
+  if (!d) return '';
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return '';
+  return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+}
+
+const heroTitle = home?.hero?.title || `Aluguel de andaimes na sua região`;
+const heroEyebrow = home?.hero?.eyebrow || config.endereco?.cidade || 'andaimes';
+const heroLead = home?.hero?.lead || 'Entrega rápida, montagem e segurança dentro da NR-18. Peça seu orçamento agora.';
+const heroImg = home?.hero?.imagem || '/assets/img/servicos/andaime-fachadeiro.jpg';
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: siteConfig.name,
+  url: String(siteUrl),
+};
+---
+
+<BaseLayout title={siteConfig.name} description={siteConfig.description}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+  </Fragment>
+  <LocalBusinessSchema />
+
+  <!-- ===== SEÇÃO 1 — HERO com imagem + overlay + CTA WhatsApp ===== -->
+  <section class="relative isolate overflow-hidden bg-ink">
+    <img
+      src={heroImg}
+      alt=""
+      aria-hidden="true"
+      fetchpriority="high"
+      decoding="async"
+      class="absolute inset-0 -z-10 h-full w-full object-cover opacity-60"
+    />
+    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-ink/90 via-ink/75 to-ink/40" aria-hidden="true"></div>
+    <div class="container-x pt-20 md:pt-28 pb-16 md:pb-24">
+      <div class="max-w-3xl">
+        <p class="eyebrow text-blue-300 mb-5" style="color:rgb(147 197 253)">{heroEyebrow}</p>
+        <h1 class="font-display text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.02] tracking-tight">
+          {heroTitle}
+        </h1>
+        <p class="text-lg md:text-xl text-slate-200 leading-relaxed mt-6 max-w-xl">{heroLead}</p>
+        <div class="mt-8 flex flex-wrap items-center gap-4">
+          <WhatsappCta label="Pedir Orçamento" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BARRA DE CONFIANÇA ===== -->
+  <TrustBar />
+
+  <!-- ===== SEÇÃO 2 — 9 SERVIÇOS ===== -->
+  <section id="servicos" class="border-b border-rule scroll-mt-20">
+    <div class="container-x py-14 md:py-20">
+      <div class="mb-10 md:mb-12 max-w-2xl">
+        <p class="eyebrow mb-4">serviços</p>
+        <h2 class="font-display text-2xl md:text-4xl font-bold tracking-tight text-ink leading-[1.1]">
+          {home?.servicosTitulo || 'O que alugamos'}
+        </h2>
+        {home?.servicosSubtitulo && (
+          <p class="text-lg text-ink-muted leading-relaxed mt-4">{home.servicosSubtitulo}</p>
+        )}
+      </div>
+      <ServicosGrid />
+    </div>
+  </section>
+
+  <!-- ===== SEÇÃO 3 — SOBRE ===== -->
+  <section class="border-b border-rule">
+    <div class="container-x py-14 md:py-20">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
+        <div class="md:col-span-4">
+          <p class="eyebrow mb-4">sobre</p>
+          <h2 class="font-display text-2xl md:text-3xl font-bold leading-[1.1] tracking-tight text-ink">
+            {home?.sobreResumo?.titulo || `Sobre a ${config.nome}`}
+          </h2>
+        </div>
+        <div class="md:col-span-7 md:col-start-6 space-y-6">
+          {home?.sobreResumo?.texto && (
+            <p class="text-lg text-ink-muted leading-relaxed">{home.sobreResumo.texto}</p>
+          )}
+          {Array.isArray(home?.sobreResumo?.destaques) && home.sobreResumo.destaques.length > 0 && (
+            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {home.sobreResumo.destaques.map((d: string) => (
+                <li class="flex items-start gap-2 text-ink">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary shrink-0 mt-0.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>{d}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <a href="/sobre" class="mono uppercase text-ink-faint inline-flex items-center gap-2 hover:text-primary hover:gap-3 transition-all">
+            conheça a empresa
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SEÇÃO 4 — COMO NOS ENCONTRAR (mapa + NAP) ===== -->
+  <section class="border-b border-rule">
+    <div class="container-x py-14 md:py-20">
+      <p class="eyebrow mb-4">{home?.comoEncontrar?.titulo || 'Como nos encontrar'}</p>
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start">
+        <div class="md:col-span-5 space-y-6">
+          {home?.comoEncontrar?.texto && (
+            <p class="text-lg text-ink-muted leading-relaxed">{home.comoEncontrar.texto}</p>
+          )}
+          <NapBlock variant="full" />
+        </div>
+        <div class="md:col-span-7">
+          {home?.comoEncontrar?.mapEmbedUrl ? (
+            <iframe
+              src={home.comoEncontrar.mapEmbedUrl}
+              title="Mapa de localização"
+              width="100%"
+              height="380"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              class="w-full border border-rule rounded"
+              style="border:0;"
+            ></iframe>
+          ) : (
+            <div class="w-full h-[380px] bg-elev border border-rule rounded flex items-center justify-center">
+              <div class="text-center p-6">
+                <p class="mono uppercase text-ink-faint mb-2">mapa</p>
+                <p class="text-sm text-ink-faint">Cole o embed do Google Maps em /admin</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SEÇÃO 5 — BLOG (6 posts em 3 colunas) ===== -->
+  {posts.length > 0 && (
+    <section class="border-b border-rule">
+      <div class="container-x py-14 md:py-20">
+        <div class="flex items-end justify-between mb-10 md:mb-12 gap-4 flex-wrap">
+          <div>
+            <p class="eyebrow mb-4">conteúdo</p>
+            <h2 class="font-display text-2xl md:text-4xl font-bold tracking-tight text-ink leading-[1.1]">
+              {home?.blogTitulo || 'Dicas e guias sobre andaimes'}
+            </h2>
+          </div>
+          <a href="/blog" class="mono uppercase text-ink-faint inline-flex items-center gap-2 hover:text-primary hover:gap-3 transition-all">
+            todos os artigos
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {posts.map((post: any) => {
+            const slug = post.slug ?? post.id;
+            const thumb = post.data.heroImage || post.data.cover || post.data.coverImage;
+            return (
+              <a href={postUrl(slug)} class="card-trade group block overflow-hidden">
+                {thumb && (
+                  <img
+                    src={thumb}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    class="w-full aspect-[16/9] object-cover"
+                  />
+                )}
+                <div class="p-6">
+                  <p class="mono uppercase text-ink-faint mb-3">
+                    {post.data.category} · {fmtShort(post.data.pubDate)}
+                  </p>
+                  <h3 class="font-display text-xl font-bold tracking-tight text-ink leading-tight mb-2 group-hover:text-primary transition-colors">
+                    {post.data.title}
+                  </h3>
+                  {post.data.description && (
+                    <p class="text-sm text-ink-muted leading-relaxed line-clamp-3">{post.data.description}</p>
+                  )}
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- ===== SEÇÃO 6 — CONTATO ===== -->
+  <section class="border-b border-rule">
+    <div class="container-x py-14 md:py-20">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start">
+        <div class="md:col-span-5">
+          <p class="eyebrow mb-4">contato</p>
+          <h2 class="font-display text-2xl md:text-4xl font-bold tracking-tight text-ink leading-[1.1] mb-5">
+            {home?.contatoTitulo || 'Peça seu orçamento'}
+          </h2>
+          {home?.contatoTexto && (
+            <p class="text-lg text-ink-muted leading-relaxed mb-6">{home.contatoTexto}</p>
+          )}
+          <WhatsappCta />
+        </div>
+        <div class="md:col-span-6 md:col-start-7">
+          <form class="space-y-5" action="/api/subscribe" method="POST">
+            <input type="hidden" name="source" value="home" />
+            <div>
+              <label class="mono uppercase text-ink-faint block mb-2" for="h-name">nome</label>
+              <input type="text" id="h-name" name="name" required class="w-full bg-transparent border-b border-rule focus:border-ink py-2 text-ink outline-none transition-colors" />
+            </div>
+            <div>
+              <label class="mono uppercase text-ink-faint block mb-2" for="h-email">email</label>
+              <input type="email" id="h-email" name="email" required class="w-full bg-transparent border-b border-rule focus:border-ink py-2 text-ink outline-none transition-colors" />
+            </div>
+            <div>
+              <label class="mono uppercase text-ink-faint block mb-2" for="h-message">mensagem</label>
+              <textarea id="h-message" name="message" rows="4" class="w-full bg-transparent border-b border-rule focus:border-ink py-2 text-ink outline-none transition-colors resize-y"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              enviar
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Seção 7 (rodapé com NAP idêntico) vem do Footer.astro do BaseLayout -->
+</BaseLayout>
